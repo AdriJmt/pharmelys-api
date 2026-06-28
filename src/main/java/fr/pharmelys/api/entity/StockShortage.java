@@ -1,5 +1,10 @@
 package fr.pharmelys.api.entity;
 
+import java.time.Instant;
+import java.time.LocalDate;
+
+import org.hibernate.annotations.UpdateTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -18,7 +23,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StockStorage {
+public class StockShortage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,4 +43,12 @@ public class StockStorage {
 
     @Enumerated(EnumType.STRING)
     private StockStatus status;
+
+    private LocalDate reportDate;
+
+    @Column(nullable = true)
+    private LocalDate restockDate;
+
+    @UpdateTimestamp
+    private Instant lastUpdatedAt;
 }
