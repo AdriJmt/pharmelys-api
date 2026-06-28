@@ -21,24 +21,21 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(
-    indexes = {
-        @Index(name = "idx_patient_email", columnList = "mail")
-    }
-)
+@Table(indexes = {
+        @Index(name = "idx_patient_email", columnList = "email")
+})
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PatientProfile {
 
- 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(length = 255)
-    private String mail;
+    private String email;
 
     @CreationTimestamp
     private Instant createdAt;

@@ -37,7 +37,7 @@ public class BdpmImportServiceImpl implements BdpmImportService {
     private final GenericGroupRepository genericGroupRepository;
     private final GenericGroupMemberRepository genericGroupMemberRepository;
     private final StockShortageRepository stockShortageRepository;
-
+    private final ImportStatusHolder importStatusHolder;
     // caches valides pour la duree d'un import, evitent les allers-retours DB en
     // boucle
     private final Map<String, Medication> medicationCache = new HashMap<>();
@@ -51,6 +51,7 @@ public class BdpmImportServiceImpl implements BdpmImportService {
         runSafely("compositions", this::importCompositions);
         runSafely("groupes generiques", this::importGenericGroups);
         runSafely("ruptures de stock", this::importShortages);
+        importStatusHolder.markImportCompleted();
         log.info("=== Fin import BDPM ===");
     }
 
@@ -273,8 +274,11 @@ public class BdpmImportServiceImpl implements BdpmImportService {
         StockShortage shortage = stockShortageRepository.findByMedication_CisCode(cisCode)
                 .orElseGet(StockShortage::new);
         shortage.setMedication(medication);
-        shortage.setRawName(c[1]);
+        shortage.setRawName(medication.getName());
         shortage.setStatus(mapStatus(c[2]));
+        shortage.setReportDate(BdpmLineParser.parseFrenchDate(c[3]));
+        shortage.setRestockDate(BdpmLineParser.parseFrenchDate(c[4]));
+
         return shortage;
     }
 

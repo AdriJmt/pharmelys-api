@@ -8,7 +8,7 @@ import fr.pharmelys.api.entity.DeclaredContraindication;
 
 @Mapper(componentModel = "spring")
 public interface ContraindicationMapper {
-    ContraindicationDTO toDTO(DeclaredContraindication entity);
+    ContraindicationDTO toDto(DeclaredContraindication entity);
 
     @Mapping(target = "patient", ignore = true)
     DeclaredContraindication toEntity(ContraindicationDTO dto);

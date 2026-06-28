@@ -33,6 +33,16 @@
       "name": "pharmelys.bdpm.ruptures-file",
       "type": "java.lang.String",
       "description": "A description for 'pharmelys.bdpm.ruptures-file'"
+    },
+    {
+      "name": "pharmelys.alerts.notification-cron",
+      "type": "java.lang.String",
+      "description": "A description for 'pharmelys.alerts.notification-cron'"
+    },
+    {
+      "name": "pharmelys.alerts.from-address",
+      "type": "java.lang.String",
+      "description": "A description for 'pharmelys.alerts.from-address'"
     }
   ]
 }

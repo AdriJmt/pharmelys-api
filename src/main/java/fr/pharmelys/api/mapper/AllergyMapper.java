@@ -8,7 +8,9 @@ import fr.pharmelys.api.entity.Allergy;
 
 @Mapper(componentModel = "spring")
 public interface AllergyMapper {
-    AllergyDTO toDTO(Allergy entity);
+
+    @Mapping(target = "substanceName", ignore = true)
+    AllergyDTO toDto(Allergy entity);
 
     @Mapping(target = "patientProfile", ignore = true)
     Allergy toEntity(AllergyDTO dto);
