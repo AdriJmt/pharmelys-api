@@ -14,14 +14,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(
-    uniqueConstraints = {
+@Table(uniqueConstraints = {
         @UniqueConstraint(name = "uk_medication_cis", columnNames = "cisCode")
-    },
-    indexes = {
+}, indexes = {
         @Index(name = "idx_medication_name", columnList = "name")
-    }
-)
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,7 +29,7 @@ public class Medication {
      * Code CIS (8 caractères max)
      */
     @Id
-    @Column(length = 8, nullable = false, updatable = false)
+    @Column(name = "cis_code",length = 8, nullable = false, updatable = false)
     private String cisCode;
 
     @Column(nullable = false, length = 255)

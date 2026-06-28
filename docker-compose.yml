@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:15.3
+    container_name: pharmelys-db
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: pharmelys
+      POSTGRES_PASSWORD: pharmelys
+      POSTGRES_DB: pharmelys
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pharmelys"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:

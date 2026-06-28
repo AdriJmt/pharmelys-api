@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -28,11 +29,12 @@ public class GenericGroupMember {
     private Long id;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "group_id")
     private GenericGroup group;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name = "medication_cis_code")
     private Medication medication;
 
-    /** 0=princeps, 1=générique, 2=complémentarité posologique, 4=substituable */
     private Integer genericType;
 }
