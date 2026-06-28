@@ -1,6 +1,7 @@
 package fr.pharmelys.api.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import fr.pharmelys.api.dto.allergy.AllergyDTO;
 import fr.pharmelys.api.entity.Allergy;
@@ -9,5 +10,6 @@ import fr.pharmelys.api.entity.Allergy;
 public interface AllergyMapper {
     AllergyDTO toDTO(Allergy entity);
 
+    @Mapping(target = "patientProfile", ignore = true)
     Allergy toEntity(AllergyDTO dto);
 }
