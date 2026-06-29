@@ -203,10 +203,13 @@ public class BdpmImportServiceImpl implements BdpmImportService {
         }
 
         GenericGroup group = genericGroupCache.computeIfAbsent(c[0], id -> {
-            GenericGroup g = genericGroupRepository.findById(id).orElseGet(GenericGroup::new);
-            g.setGroupId(id);
-            g.setLabel(c[1]);
-            return genericGroupRepository.save(g);
+            return genericGroupRepository.findById(id)
+                    .orElseGet(() -> {
+                        GenericGroup g = new GenericGroup();
+                        g.setGroupId(id);
+                        g.setLabel(c[1]);
+                        return genericGroupRepository.save(g);
+                    });
         });
         if (group == null) {
             log.warn("[CIS_GENER_bdpm] Groupe {} introuvable apres creation, membre ignore", c[0]);

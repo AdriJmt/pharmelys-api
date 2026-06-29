@@ -40,12 +40,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MedicationServiceImpl implements MedicationService {
 
-        /**
-         * Texte fixe rappelé sur toute réponse de recommandation, conformément au
-         * cahier des charges §5.4.9.
-         */
-        private static final String MEDICAL_DISCLAIMER = "This information does not replace the advice of a doctor or pharmacist. "
-                        + "Do not change a treatment without medical validation.";
+        private static final String MEDICAL_DISCLAIMER = "Ces informations ne remplacent pas l'avis d'un médecin ou d'un pharmacien. "
+                        + "Ne modifiez pas un traitement sans validation médicale.";
 
         private static final String ACTIVE_COMPONENT_NATURE = "SA";
 
@@ -116,7 +112,7 @@ public class MedicationServiceImpl implements MedicationService {
 
                 if (groupIds.isEmpty()) {
                         return new AlternativesResponseDTO(sourceDTO, profileId != null, List.of(), List.of(),
-                                        "No known generic alternative for this medication", MEDICAL_DISCLAIMER);
+                                        "Pas de substitution générique connue pour ce médicament", MEDICAL_DISCLAIMER);
                 }
 
                 List<Medication> candidates = genericGroupMemberRepository
