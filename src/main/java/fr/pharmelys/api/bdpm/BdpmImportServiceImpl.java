@@ -1,6 +1,7 @@
 package fr.pharmelys.api.bdpm;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -202,15 +203,13 @@ public class BdpmImportServiceImpl implements BdpmImportService {
             return null;
         }
 
-        GenericGroup group = genericGroupCache.computeIfAbsent(c[0], id -> {
-            return genericGroupRepository.findById(id)
-                    .orElseGet(() -> {
-                        GenericGroup g = new GenericGroup();
-                        g.setGroupId(id);
-                        g.setLabel(c[1]);
-                        return genericGroupRepository.save(g);
-                    });
-        });
+        GenericGroup group = genericGroupCache.computeIfAbsent(c[0], id -> genericGroupRepository.findById(id)
+                .orElseGet(() -> {
+                    GenericGroup g = new GenericGroup();
+                    g.setGroupId(id);
+                    g.setLabel(c[1]);
+                    return genericGroupRepository.save(g);
+                }));
         if (group == null) {
             log.warn("[CIS_GENER_bdpm] Groupe {} introuvable apres creation, membre ignore", c[0]);
             return null;
@@ -247,7 +246,6 @@ public class BdpmImportServiceImpl implements BdpmImportService {
     public void importShortages() {
         List<String> lines = downloadOrThrow(
                 properties.getBaseUrl() + properties.getRupturesFile(), "fichier ruptures");
-        logPreview(lines);
 
         int imported = 0;
         for (String line : lines) {
@@ -262,7 +260,7 @@ public class BdpmImportServiceImpl implements BdpmImportService {
 
     private StockShortage parseShortageRow(String line) {
         String[] c = line.split("\t", -1);
-        if (c.length < 3) {
+        if (c.length < 4) {
             log.warn("[ruptures] Ligne ignoree, format inattendu : {}", line);
             return null;
         }
@@ -274,28 +272,40 @@ public class BdpmImportServiceImpl implements BdpmImportService {
             return null;
         }
 
+        // Le nombre de colonnes varie selon les lignes (ex: CIP13 present ou non),
+        // donc on identifie le statut et les dates par leur contenu plutot que
+        // par leur position fixe.
+        String statusText = null;
+        List<String> dates = new ArrayList<>();
+        for (int i = 1; i < c.length; i++) {
+            String value = c[i].trim();
+            if (value.isEmpty() || value.startsWith("http")) {
+                continue;
+            }
+            if (value.matches("\\d{2}/\\d{2}/\\d{4}")) {
+                dates.add(value);
+            } else if (value.matches("\\d+")) {
+                // code numerique (CIP13, numero de sequence, etc.) : non exploite
+            } else {
+                statusText = value;
+            }
+        }
+
+        if (statusText == null) {
+            log.warn("[ruptures] Statut introuvable, ligne ignoree : {}", line);
+            return null;
+        }
+
         StockShortage shortage = stockShortageRepository.findByMedication_CisCode(cisCode)
                 .orElseGet(StockShortage::new);
         shortage.setMedication(medication);
         shortage.setRawName(medication.getName());
-        shortage.setStatus(mapStatus(c[2]));
-        shortage.setReportDate(BdpmLineParser.parseFrenchDate(c[3]));
-        shortage.setRestockDate(BdpmLineParser.parseFrenchDate(c[4]));
+        shortage.setStatus(mapStatus(statusText));
+        shortage.setReportDate(
+                !dates.isEmpty() ? BdpmLineParser.parseFrenchDate(dates.get(0)) : null);
+        shortage.setRestockDate(dates.size() > 1 ? BdpmLineParser.parseFrenchDate(dates.get(1)) : null);
 
         return shortage;
-    }
-
-    private void logPreview(List<String> lines) {
-        if (!log.isInfoEnabled()) {
-            return;
-        }
-
-        for (int i = 0; i < Math.min(5, lines.size()); i++) {
-            String line = lines.get(i);
-            String[] preview = line.split("\t", -1);
-
-            log.info("[ruptures][preview ligne {}] {} colonnes -> {}", i, preview.length, line);
-        }
     }
 
     private StockStatus mapStatus(String raw) {

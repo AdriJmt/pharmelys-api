@@ -1,7 +1,9 @@
 package fr.pharmelys.api.service;
 
-import java.util.List;
 import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import fr.pharmelys.api.dto.medication.AlternativesResponseDTO;
 import fr.pharmelys.api.dto.medication.MedicationDetailDTO;
@@ -14,16 +16,12 @@ import fr.pharmelys.api.dto.medication.MedicationSummaryDTO;
 public interface MedicationService {
 
     /**
-     * Recherche des médicaments par nom, insensible à la casse et aux accents.
+     * Recherche les médicaments par nom, avec pertinence et pagination.
      *
-     * @param term terme recherché, doit faire au moins 3 caractères
-     * @return jusqu'à 20 résultats triés par pertinence
-     * @throws fr.pharmelys.api.exception.InvalidSearchQueryException si
-     *                                                                {@code term}
-     *                                                                fait moins de
-     *                                                                3 caractères
+     * @param term     terme de recherche
+     * @param pageable pagination et tri
      */
-    List<MedicationSummaryDTO> search(String term);
+    Page<MedicationSummaryDTO> search(String term, Pageable pageable);
 
     /**
      * Récupère le détail complet d'un médicament.

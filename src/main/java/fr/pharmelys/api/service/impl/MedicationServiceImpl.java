@@ -2,13 +2,15 @@ package fr.pharmelys.api.service.impl;
 
 import java.text.Normalizer;
 import java.time.Clock;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import fr.pharmelys.api.dto.medication.AlternativeCandidateDTO;
@@ -55,20 +57,24 @@ public class MedicationServiceImpl implements MedicationService {
         private final Clock clock;
 
         @Override
-        public List<MedicationSummaryDTO> search(String term) {
+        public Page<MedicationSummaryDTO> search(String term, Pageable pageable) {
                 if (term == null || term.trim().length() < 3) {
-                        throw new InvalidSearchQueryException("Search term must contain at least 3 characters");
+                        throw new InvalidSearchQueryException("Le terme de recherche doit faire au moins 3 caractères");
                 }
 
-                // Note perf : une requete de statut de rupture par resultat (max 20).
-                // Acceptable pour le
-                // volume actuel ; a regrouper en une seule requete batch si la latence devient
-                // un probleme.
-                return medicationRepository.searchByNameRelevance(term.trim()).stream()
+                // On ignore volontairement tout Sort venant du pageable : l'ordre de
+                // pertinence est fixé dans la requête (cf. MedicationRepository).
+                Pageable safePageable = PageRequest.of(
+                                pageable.getPageNumber(),
+                                pageable.getPageSize());
+
+                // Note perf : une requete de statut de rupture par resultat (max page size).
+                // Acceptable pour le volume actuel ; a regrouper en une seule requete batch
+                // si la latence devient un probleme.
+                return medicationRepository.searchByNameRelevance(term.trim(), safePageable)
                                 .map(m -> new MedicationSummaryDTO(
                                                 m.getCisCode(), m.getName(), m.getPharmaceuticalForm(),
-                                                currentShortageStatus(m.getCisCode())))
-                                .toList();
+                                                currentShortageStatus(m.getCisCode())));
         }
 
         @Override
@@ -169,11 +175,8 @@ public class MedicationServiceImpl implements MedicationService {
         }
 
         private boolean isActiveShortage(StockShortage shortage) {
-                boolean isShortageOrTension = shortage.getStatus() == StockStatus.SHORTAGE
+                return shortage.getStatus() == StockStatus.SHORTAGE
                                 || shortage.getStatus() == StockStatus.TENSION;
-                boolean alreadyRestocked = shortage.getRestockDate() != null
-                                && !shortage.getRestockDate().isAfter(LocalDate.now(clock));
-                return isShortageOrTension && !alreadyRestocked;
         }
 
         private String currentShortageStatus(String cisCode) {

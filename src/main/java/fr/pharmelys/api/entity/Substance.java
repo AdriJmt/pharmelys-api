@@ -12,14 +12,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(
-    uniqueConstraints = {
+@Table(uniqueConstraints = {
         @UniqueConstraint(name = "uk_substance_code", columnNames = "substanceCode")
-    },
-    indexes = {
+}, indexes = {
         @Index(name = "idx_substance_name", columnList = "name")
-    }
-)
+})
 @Getter
 @Setter
 @NoArgsConstructor

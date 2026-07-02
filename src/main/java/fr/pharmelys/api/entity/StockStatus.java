@@ -1,5 +1,5 @@
 package fr.pharmelys.api.entity;
 
 public enum StockStatus {
-SHORTAGE,TENSION,RESTOCKED,DISCONTINUED,OTHER
+    SHORTAGE, TENSION, RESTOCKED, DISCONTINUED, OTHER
 }
